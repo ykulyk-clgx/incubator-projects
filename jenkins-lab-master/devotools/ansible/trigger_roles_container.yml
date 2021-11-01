@@ -1,0 +1,7 @@
+- hosts: localhost
+  become: yes
+  remote_user: ec2-user
+  become_user: root
+  roles:
+    - build_container
+    #- deploy_container
