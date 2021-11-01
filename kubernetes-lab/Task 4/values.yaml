@@ -1,0 +1,51 @@
+namespace: yuriy
+replicaCount: 2
+
+image:
+  repository: redis
+  tag: 6.2.6
+  pullPolicy: IfNotPresent
+
+resources:
+  reguest_cpu: "100m"
+  reguest_ram: "100Mi"
+  max_cpu: "500m"
+  max_ram: "256Mi"
+
+storage: 2Gi
+storageClassName: hcloud-volumes
+
+topologySpreadConstraints:
+  maxSkew: 1
+  topologyKey: kubernetes.io/hostname
+
+nodeSelector: 
+  # database_storage: "true"
+  node-role.kubernetes.io/worker: "true"
+
+service:
+  serviceType: ClusterIP
+  containerPort: 6379
+
+ingress:
+  enabled: false
+  className: ""
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+  hosts:
+    - host: fortune-yuriy.kubelab.spainip.es
+      port: 80
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+  - secretName: tls-ingress-fortune-ingress
+    hosts:
+      - fortune-yuriy.kubelab.spainip.es
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80

@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-statefulset
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: redis
+      type: server
+      role: master
+  replicas: {{ .Values.replicaCount }}
+  serviceName: "redis-service"
+  template:
+    metadata:
+      labels:
+        app: redis
+        type: server
+        role: master
+    spec:
+      topologySpreadConstraints:
+      - maxSkew: {{ .Values.topologySpreadConstraints.maxSkew }}
+        topologyKey: {{ .Values.topologySpreadConstraints.topologyKey }}
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: redis
+            type: server
+            role: master
+      containers:
+      - name: redis-server
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        ports:
+        - name: redis-port
+          containerPort: {{ .Values.service.containerPort }}
+        volumeMounts:
+        - name: redis-data-pvc
+          mountPath: /data
+        livenessProbe:
+          exec:
+            command: ["redis-cli", "ping"]
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command: ["redis-cli", "--scan"]
+          initialDelaySeconds: 5
+          periodSeconds: 2
+          timeoutSeconds: 1
+        resources:
+          requests:
+            memory: {{ .Values.resources.reguest_ram }}
+            cpu: {{ .Values.resources.reguest_cpu }}
+          limits:
+            memory: {{ .Values.resources.max_ram }}
+            cpu: {{ .Values.resources.max_cpu }}
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 12 }}
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-data-pvc
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.storage }}
+      storageClassName: {{ .Values.storageClassName }}

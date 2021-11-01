@@ -1,0 +1,7 @@
+apiVersion: v2
+appVersion: 6.2.6
+description: Redis sample helm chart
+icon: https://i.imgur.com/Dj98hnm.png
+name: redis-helm
+type: application
+version: 0.5.6
