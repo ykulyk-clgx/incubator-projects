@@ -1,1 +1,0 @@
-<h1>Terraform assignments</h1>
