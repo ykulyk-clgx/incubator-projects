@@ -67,3 +67,4 @@ It should be placed in task2.groovy file, be runable with Jenkins Script Console
   * create credentials `USERNAME` and `PASSWORD`
   * create group and role `poweruser` and assing it to `folder1`
   * inside folder3 create test-job with build permissions for `poweruser`
+
