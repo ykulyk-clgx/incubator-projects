@@ -1,0 +1,16 @@
+upstream backend {
+  server {{ linux_ip_addr }};
+  server {{ linux_two_ip_addr }};
+}
+
+server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        #root /var/www/html;
+        server_name _;
+
+        location / {
+                proxy_pass http://backend;
+                proxy_http_version 1.1;
+        }
+}

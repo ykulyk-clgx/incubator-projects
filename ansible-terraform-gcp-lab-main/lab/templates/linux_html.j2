@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to linux vm!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+    <p>This is machine {{ ansible_hostname }} running {{ ansible_lsb.description }}. IP is: {{ ansible_default_ipv4.address }}</p>
+    <p>{% raw %}{{ my_string }}{% endraw %}</p>
+</body>
+</html>

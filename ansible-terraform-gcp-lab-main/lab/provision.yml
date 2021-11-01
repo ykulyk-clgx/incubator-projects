@@ -1,0 +1,160 @@
+---
+- name: Setting up linux and linux proxy
+  hosts: proxy:linux
+  become: yes
+  gather_facts: no
+  check_mode: no
+
+  vars:
+    file_owners: ansible
+    source_file: ./linux_proxy.j2
+    destination_file: /etc/nginx/sites-available/default
+    html_source_file: ./linux_html.j2
+    py_destination_folder: /web_server
+    html_destination_folder: /web_server/templates
+    html_destination_file_windows: C:\web\html\index.html
+    python_source_file: ./templates/server.py 
+
+    linux_ip_addr: "{{ hostvars[groups['linux'][0]]['ansible_default_ipv4']['address'] }}"
+    linux_two_ip_addr: "{{ hostvars[groups['linux'][1]]['ansible_default_ipv4']['address'] }}"
+    #windows_ip_addr: "{{ hostvars[groups['windows'][0]]['ansible_default_ipv4']['address'] }}"
+
+  tasks:
+  - wait_for_connection:
+      delay: 10
+      timeout: 600
+
+  - setup:
+      gather_timeout: 30
+
+  - apt: 
+      update_cache: yes
+
+  - apt: 
+      name: nginx 
+      state: latest
+    notify:
+    - proxy apt
+    - proxy template
+    - proxy service enable
+    - proxy service restart
+    when: inventory_hostname in groups['proxy']
+
+  - apt: 
+      pkg:
+      - fortune-mod
+      - python3
+      - python3-pip
+    notify:
+    - linux flask
+    - linux folder py
+    - linux folder html
+    - linux template
+    - linux copy
+    - linux shell
+    when: inventory_hostname in groups['linux']
+
+  handlers:
+    - name: linux flask
+      shell:
+        cmd: 'sudo pip3 install flask'
+   #  pip:
+   #     name: flask
+   #     virtualenv: /tmp/py3
+   #     virtualenv_command: /usr/bin/python3 -m venv
+   #     executable: pip3
+    - name: linux folder py
+      file:
+        path: '{{ py_destination_folder }}'
+        owner: '{{ file_owners }}'
+        group: '{{ file_owners }}'
+        state: directory
+        mode: '0755'
+
+    - name: linux folder html
+      file:
+        path: '{{ html_destination_folder }}'
+        owner: '{{ file_owners }}'
+        group: '{{ file_owners }}'
+        state: directory
+        mode: '0755'
+  
+    - name: linux template   
+      template:
+        src: '{{ html_source_file }}'
+        dest: '{{ html_destination_folder }}/index.html'
+        mode: '0755'
+
+    - name: linux copy
+      copy:
+        src: '{{ python_source_file }}'
+        dest: '{{ py_destination_folder }}/server.py'
+        owner: '{{ file_owners }}'
+        group: '{{ file_owners }}'
+        mode: '0755'
+
+    - name: linux shell
+      shell: 
+        cmd: 'sudo python3 {{ py_destination_folder }}/server.py >/dev/null 2>&1 &'
+      async: 10
+      poll: 0 
+
+    - name: proxy apt
+      apt: 
+        name: nginx
+        state: latest
+
+    - name: proxy template
+      template: 
+        src: '{{ source_file }}'
+        dest: '{{ destination_file }}'
+        mode: 0555
+
+    - name: proxy service enable
+      service: 
+        name: nginx 
+        enabled: yes
+
+    - name: proxy service restart
+      service:
+        name: nginx 
+        state: restarted  
+
+
+
+#- name: Setup Windows
+#  hosts: windows
+#  gather_facts: no
+#  check_mode: no
+#
+#  tasks:
+#  - wait_for_connection:
+#      delay: 10
+#      timeout: 600
+#  - win_chocolatey:
+#      name: nginx
+#      state: present
+#  - win_chocolatey:
+#      name: nssm
+#      state: present
+#  - win_template:
+#      src={{ source_file }}
+#      dest={{ destination_file_windows }}
+#      mode=0555
+#  - win_nssm:
+#      name: nginx
+#      application: C:\ProgramData\chocolatey\lib\nginx\tools\nginx-1.21.3\nginx.exe
+#      app_parameters_free_form: -c C:\ProgramData\chocolatey\lib\nginx\tools\nginx-1.21.3\conf\nginx.conf -p C:\ProgramData\chocolatey\lib\nginx\tools\nginx-1.21.3
+#      stdout_file: C:\nginx_out.txt
+#      stderr_file: C:\nginx_error.txt
+#      start_mode: auto
+#      state: started
+#      notify:
+#        - start nginx
+#
+#  handlers:
+#    - name: start nginx
+#      win_service:
+#        name: nginx
+#        start_mode: auto
+#        state: started

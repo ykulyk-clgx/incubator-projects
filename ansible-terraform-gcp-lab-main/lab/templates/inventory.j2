@@ -1,0 +1,24 @@
+[windows]
+{{ windows_ip_addr }}
+
+[linux]
+{{ linux_ip_addr }}
+{{ linux_two_ip_addr }}
+
+[proxy]
+{{ proxy_ip_addr }}
+
+[all:vars]
+ansible_user={{ user_name }}
+ansible_ssh_private_key_file={{ key_location }}
+
+[windows:vars]
+ansible_connection=ssh
+ansible_user={{ user_name }}
+ansible_ssh_private_key_file={{ key_location }}
+ansible_shell_type=powershell
+#ansible_become=yes
+#ansible_become_method=runas
+#ansible_python_interpreter=/usr/bin/python3
+#remote_tmp=C:\Users\ansible\tmp
+#local_tmp=C:\Users\ansible\tmp

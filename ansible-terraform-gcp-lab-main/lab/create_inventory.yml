@@ -1,0 +1,16 @@
+---
+- name: Creating inventory form dyn values
+  hosts: localhost
+  connection: local
+
+  vars:
+    source_file: ./inventory.j2
+    destination_file: ./hosts
+    key_location: ~/.ssh/ansible
+    user_name: ansible
+
+  tasks:
+  - template:
+      src={{ source_file }}
+      dest={{ destination_file }}
+      mode=0755
