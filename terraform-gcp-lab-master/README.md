@@ -1,1 +1,1 @@
-Terraform HW, GCP inf
+Terraform assignment, GCP inf
