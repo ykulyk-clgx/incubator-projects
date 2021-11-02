@@ -22,6 +22,7 @@
 5. Check info about pub/sub and events
 
 <h4>Task 3:</h4>
+
 1. Create a function (python3) that will run through pubsub and print a message
 2. Configure automatic start of this function every hour
 3. (optional) The function should connect to BigQuery and display statistics on http responses for the last hour
