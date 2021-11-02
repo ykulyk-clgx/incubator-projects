@@ -8,7 +8,7 @@ A small ansible & terraform project. Creates 3+ VMS: 1st one is a reverse proxy 
 
 Nginx server checks and redirects traffic (as lb) to 2 internal Linux VMS, where a simple HTTP template and fortune script are located.
 
-As a rusгlt, we have a web page that shows VM name, OS name, internal IP address, and randomly chosen fortune on every new connection.
+Generaly, we should have a web page that shows VM name, OS name, internal IP address, and randomly chosen fortune on every new connection.
 
 <h3>How it works:</h3>
 
